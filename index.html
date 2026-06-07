@@ -385,15 +385,25 @@ function updateStandings(g){
 }
 
 // ━━━━━━━━━━━━━━━━━━ AUTO-FILL & PROPAGATE ━━━━━━━━━━━━━━━━━━
+function groupFinished(g){
+  // Un groupe est "terminé" si au moins les 3 derniers matchs (journée 3) ont un score
+  const matches=state.groups[g].matches;
+  // Au moins 1 match joué pour afficher
+  return matches.some(m=>m.h!==null&&m.a!==null);
+}
+
 function autoFill(){
   const gs={};
   for(const g of Object.keys(GROUPS)) gs[g]=calcStandings(g);
   R16.forEach(([g1,g2],i)=>{
-    const t1=gs[g1]&&gs[g1][0];
-    const t2=gs[g2]&&gs[g2][1];
     const bm=state.bracket[0][i];
+    // Seulement si le groupe a au moins un match joué
+    const t1=groupFinished(g1)?gs[g1][0]:null;
+    const t2=groupFinished(g2)?gs[g2][1]:null;
     if(t1){bm.h=t1.name;bm.hf=t1.f;bm.hlbl=`1er Gr.${g1}`;}
+    else{bm.h='';bm.hf='';bm.hlbl=`1er Gr.${g1}`;}
     if(t2){bm.a=t2.name;bm.af=t2.f;bm.albl=`2e Gr.${g2}`;}
+    else{bm.a='';bm.af='';bm.albl=`2e Gr.${g2}`;}
   });
   propagate();
   save();
